@@ -25,19 +25,12 @@ dat <- dat_orig %>%
   map(str_split, " +") %>%
   map_depth(.depth = 2, as.numeric)
 
-map_input_to_dest <- function(input, map, direction = "forward") {
+map_input_to_dest <- function(input, map) {
   result <- input
   for (i in map) {
-    if (direction == "forward") {
-      if (i[[2]] <= input && input <= i[[2]] + i[[3]]) {
-        result <- i[[1]] + input - i[[2]]
-        break
-      }
-    } else if (direction == "backward") {
-      if (i[[1]] <= input && input <= i[[1]] + i[[3]]) {
-        result <- input + i[[2]] - i[[1]]
-        break
-      }
+    if (i[[2]] <= input && input <= i[[2]] + i[[3]]) {
+      result <- i[[1]] + (input - i[[2]])
+      break
     }
   }
   result
@@ -53,36 +46,4 @@ for (i in 2:length(dat)) {
 
 min(results[[length(results)]])
 
-## Part 2
-seed_from_location <- function(loc_num, almanac) {
-  result <- loc_num
-  for (i in rev(seq_along(dat))[-length(almanac)]) {
-    result <- map_input_to_dest(
-      result,
-      almanac[[i]],
-      direction = "backward"
-    )
-  }
-  result
-}
 
-
-seed_ranges <- matrix(dat[[1]][[1]], ncol = 2, byrow = TRUE)
-
-seed_in_range <- function(seed, mat) {
-  any(
-    apply(
-      mat,
-      function(x) seed >= x[1] && seed <= (x[1] + x[2]),
-      MARGIN = 1
-    )
-  )
-}
-
-seed <- 0
-location <- 1
-while (!seed_in_range(seed, seed_ranges)) {
-  location <- location + 1
-  seed <- seed_from_location(location, dat)
-}
-location
