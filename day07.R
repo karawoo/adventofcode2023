@@ -2,6 +2,19 @@ library("readr")
 library("stringr")
 library("tidyverse")
 
+factorize <- function(x, jokers_wild = FALSE) {
+  if (jokers_wild) {
+    levels <- c("J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A")
+  } else {
+    levels <-  c("2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
+  }
+  factor(
+    x,
+    levels = levels,
+    ordered = TRUE
+  )
+}
+
 hand_type <- function(hand, jokers_wild = FALSE) {
   if (jokers_wild && !all(hand == "J"))  {
     counts <- table(hand[hand != "J"])
@@ -24,19 +37,6 @@ hand_type <- function(hand, jokers_wild = FALSE) {
     type <- "highcard"
   }
   factor(type, levels = c("highcard", "onepair", "twopair", "3kind", "fullhouse", "4kind", "5kind"))
-}
-
-factorize <- function(x, jokers_wild = FALSE) {
-  if (jokers_wild) {
-    levels <- c("J", "2", "3", "4", "5", "6", "7", "8", "9", "T", "Q", "K", "A")
-  } else {
-    levels <-  c("2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
-  }
-  factor(
-    x,
-    levels = levels,
-    ordered = TRUE
-  )
 }
 
 get_winnings <- function(jokers_wild = FALSE) {
