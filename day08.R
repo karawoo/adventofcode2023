@@ -2,8 +2,6 @@ library("readr")
 library("stringr")
 library("pracma")
 
-dat <- read_lines("input08.txt")
-
 Map <- R6::R6Class("Map", list(
   instructions = c(),
   map = list(),
