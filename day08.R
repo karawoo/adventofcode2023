@@ -1,5 +1,6 @@
 library("readr")
 library("stringr")
+library("pracma")
 
 dat <- read_lines("input08.txt")
 
@@ -34,14 +35,36 @@ Map <- R6::R6Class("Map", list(
     invisible(self)
   },
 
-  run = function() {
+  reset_counts = function() {
+    self$step_count <- 0
+    self$inst_count <- 1
+  },
+
+  run = function(part = c(1, 2)) {
     self$read_input()
-    while (self$position != "ZZZ") {
-      self$new_position(self$instructions[self$inst_count])
+    if (part == 1) {
+      while (self$position != "ZZZ") {
+        self$new_position(self$instructions[self$inst_count])
+      }
+    } else {
+      starting_positions <- na.omit(str_extract(names(self$map), "[A-Z]{2}A$"))
+      counts <- vector(mode = "numeric", length = length(starting_positions))
+      for (i in seq_along(starting_positions)) {
+        self$position <- starting_positions[i]
+        self$reset_counts()
+        while (!str_detect(self$position, "Z$")) {
+          self$new_position(self$instructions[self$inst_count])
+        }
+        counts[i] <- self$step_count
+      }
+      self$step_count <- Reduce(pracma::Lcm, counts)
     }
     self$step_count
   }
 ))
 
-m <- Map$new()
-m$run()
+m1 <- Map$new()
+m1$run(part = 1)
+m2 <- Map$new()
+m2$run(part = 2)
+print(m2$step_count, digits = 14)
