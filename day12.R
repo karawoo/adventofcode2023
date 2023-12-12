@@ -14,12 +14,28 @@ sizes <- lapply(dat, `[[`, 2) %>%
   lapply(as.numeric)
 
 get_candidates <- function(row, sizes) {
+  n_unknown <- sum(row == "?")
+  n_unknown_broken <- sum(sizes) - sum(row == "#")
+
   poss_vals <- c(
-    rep("#", sum(sizes)),
-    rep(".", length(row) - sum(sizes))
+    rep("#", n_unknown_broken),
+    rep(".", n_unknown - n_unknown_broken)
   )
-  perms <- unique(permn(poss_vals))
-  candidate <- keep(perms, \(x) all(x == row | row == "?"))
+  opts <- unique(permn(poss_vals))
+
+  row_rep <- rep(list(row), length(opts))
+
+  perms <- mapply(
+    function(row, opt) {
+      row[which(row == "?")] <- opt
+      row
+    },
+    row_rep,
+    opts,
+    SIMPLIFY = FALSE
+  )
+
+  keep(perms, \(x) all(x == row | row == "?"))
 }
 
 is_candidate_consistent <- function(candidate, sizes) {
@@ -31,3 +47,9 @@ is_candidate_consistent <- function(candidate, sizes) {
   identical(unname(sums[sums != 0]), sizes)
 }
 
+are_candidates_consistent <- function(candidates, sizes) {
+  sum(vapply(candidates, is_candidate_consistent, logical(1), sizes))
+}
+
+candidates <- mapply(get_candidates, rows, sizes)
+sum(mapply(are_candidates_consistent, candidates, sizes))
